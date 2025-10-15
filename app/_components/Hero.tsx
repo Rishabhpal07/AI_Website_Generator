@@ -1,8 +1,15 @@
 'use client'
 import { Button } from '@/components/ui/button'
-import { SignIn, SignInButton } from '@clerk/nextjs'
-import { ArrowUp, HomeIcon, icons, ImagePlus, Key, LayoutDashboard, User } from 'lucide-react'
+import { SignIn, SignInButton, useUser,  } from '@clerk/nextjs'
+import axios from 'axios'
+import { ArrowUp, HomeIcon, icons, ImagePlus, Key, LayoutDashboard, Loader2Icon, User } from 'lucide-react'
+import { Content } from 'next/font/google'
+
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
+import { toast } from 'sonner'
+import { v4 as uuidv4 } from 'uuid';
 
 const suggestions = [
     {
@@ -25,10 +32,47 @@ const suggestions = [
         icon: User
     }
 ]
+const GenerateRandomFrameNumber=()=>{
+  const number=Math.floor(Math.random()*10000)
+  return number
+}
+
 
 function Hero() {
 
     const [userInput,setUserInput]=useState<string>()
+    const {user}=useUser();
+    const Router=useRouter()
+    const [loading,setloading]=useState(false)
+
+    const createNewProject=async()=>{
+      setloading(true)
+      const projectId=uuidv4()
+      const frameId=GenerateRandomFrameNumber()
+      const message=[
+        {
+          role:'user',
+          Content:userInput
+        }
+      ]
+      try {
+        const result=await axios.post('/api/projects',{
+           projectId:projectId,
+           frameId:frameId,
+           message:message
+        })
+        console.log(result.data)
+        toast.success('project created')
+        Router.push(`/playground/${projectId}?frameId=${frameId}`)
+        setloading(false)
+      } catch (error) {
+        toast.error('internal server error')
+        console.log(error)
+        setloading(false)
+
+      }
+    }
+
   return (
     <div className='flex items-center flex-col h-[80vh] justify-center'>
       <h2 className='font-bold text-5xl'>what should be Design?</h2>
@@ -43,9 +87,12 @@ function Hero() {
         />
         <div className='flex justify-between items-center'>
             <Button variant={'ghost'} size={'icon'}><ImagePlus/></Button>
-            <SignInButton mode='modal' forceRedirectUrl={'/workspace'}>
+            {!user ? <SignInButton mode='modal' forceRedirectUrl={'/workspace'}>
             <Button disabled={!userInput}><ArrowUp/></Button>
-            </SignInButton>
+            </SignInButton>:
+            <Button disabled={!userInput || loading} onClick={createNewProject}>
+              {loading?<Loader2Icon className='animate-spin'/>:<ArrowUp/>}</Button>
+}
         </div>
       </div>
       <div className='mt-4 flex gap-3'>
