@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { SignIn, SignInButton, useUser,  } from '@clerk/nextjs'
 import axios from 'axios'
 import { ArrowUp, HomeIcon, icons, ImagePlus, Key, LayoutDashboard, Loader2Icon, User } from 'lucide-react'
-import { Content } from 'next/font/google'
+
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -52,7 +52,7 @@ function Hero() {
       const message=[
         {
           role:'user',
-          Content:userInput
+          content:userInput
         }
       ]
       try {

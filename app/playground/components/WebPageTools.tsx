@@ -1,23 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react'
-import WebPageTools from './WebPageTools';
+import { Button } from '@/components/ui/button'
+import { Code2Icon, Download, Monitor, SquareArrowOutUpLeft, SquareArrowOutUpRight, TabletSmartphone } from 'lucide-react'
+import React from 'react'
 
-type Props={
-  generatedCode:string
-}
-
-function WebsiteDesignSection({ generatedCode }: Props) {
-    const iframeRef = useRef<HTMLIFrameElement>(null);
-    const [selectedScreenSize,setSelectedScreenSize]=useState('web')
-
-    // Initialize iframe shell once
-    useEffect(() => {
-        if (!iframeRef.current) return;
-        const doc = iframeRef.current.contentDocument;
-        if (!doc) return;
-
-        doc.open();
-        doc.write(`
-      <!DOCTYPE html>
+const HTML_CODE=` <!DOCTYPE html>
       <html lang="en">
       <head>
           <meta charset="UTF-8" />
@@ -58,41 +43,35 @@ function WebsiteDesignSection({ generatedCode }: Props) {
           <script src="https://unpkg.com/tippy.js@6"></script>
       </head>
       <body id="root"></body>
-      </html>
-    `);
-        doc.close();
-    }, []);
+      {code}
+      </html>`
 
-    // Update body only when code changes
-    useEffect(() => {
-        if (!iframeRef.current) return;
-        const doc = iframeRef.current.contentDocument;
-        if (!doc) return;
+function WebPageTools({selectedScreenSize,setSelectedScreenSize,generatedCode}:any) {
+  const ViewInNewTab=()=>{
+  if(!generatedCode) return
 
-        const root = doc.getElementById("root");
-        if (root) {
-            root.innerHTML =
-                generatedCode
-                    ?.replaceAll("```html", "")
-                    .replaceAll("```", "")
-                    .replace("html", "") ?? "";
-        }
-    }, [generatedCode]);
+  const cleanCode=(HTML_CODE.replace('{code}',generatedCode)||'').replaceAll("```html",'').replace('```','').replace('html','')
 
-    return (
-      <div className='p-5 w-full flex items-center flex-col'>
-           <iframe
-            ref={iframeRef}
-            className={`${selectedScreenSize=='web'?'w-full':'w-120'} h-[700px] border rounded-xl`}
-            sandbox="allow-scripts allow-same-origin"
-        />
-        <WebPageTools selectedScreenSize={selectedScreenSize}
-        setSelectedScreenSize={(v:string)=>setSelectedScreenSize(v)}
-        generatedCode={generatedCode}
-        />
+  const blob=new Blob( [cleanCode], {type: 'text/html'}) ;
+     const url=URL.createObjectURL(blob);
+    window. open(url,"_blank" )
+  }
+
+  return (
+    <div className='p-3 shadow rounded-xl w-full flex justify-between'>
+      <div className='flex gap-2'>
+        <Button variant={'ghost'}
+        className={`${selectedScreenSize=='web'?'border border-primary':null}`}
+        onClick={()=>setSelectedScreenSize('web')}><Monitor/></Button>
+        <Button variant={'ghost'} className={`${selectedScreenSize=='mobile'?'border border-primary':null}`} onClick={()=>setSelectedScreenSize('mobile')}><TabletSmartphone/></Button>
       </div>
-    );
+      <div className='flex gap-2'>
+        <Button variant={'outline'} onClick={()=>ViewInNewTab()}>View <SquareArrowOutUpRight/></Button>
+        <Button>View <Code2Icon/></Button>
+        <Button>Download code<Download/></Button>
+      </div>
+    </div>
+  )
 }
 
-
-export default WebsiteDesignSection
+export default WebPageTools

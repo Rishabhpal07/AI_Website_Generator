@@ -1,14 +1,15 @@
 import React, { useState } from 'react'
-import { Messages } from '../[projectId]/page'
 import { Button } from '@/components/ui/button'
 import { ArrowUp } from 'lucide-react'
+import { Messages } from '../[projectId]/page'
 
 type Props={
     messages:Messages[]
-    onSend:any
+    onSend:any,
+    loading:boolean
 }
 
-function ChatSection({messages,onSend}:Props) {
+function ChatSection({messages,onSend,loading}:Props) {
     const [input ,setInput]=useState<string>()
 
     const handleSend=()=>{
@@ -27,17 +28,23 @@ function ChatSection({messages,onSend}:Props) {
             messages.map((msg,idx)=>(
                 <div key={idx} className={`flex ${msg.role=='user'?'justify-end':'justify-start'}`}>
                   <div className={`p-2 rounded-lg max-w-[80%] ${msg.role=='user'?'bg-gray-100 text-black':'bg-gray-300 text-black'}`}>
-                    {msg.Content }
+                    {msg.content }
                   </div>
                 </div>
             ))
           )}
+         {loading&& <div className='flex justify-center items-center p-4'>
+            <div className='animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-zinc-200'>
+            </div>
+            <span className='ml-2 text-zinc-800'>thinking...</span>
+          </div>
+}
       </div>
       <div className='p-3 border-t flex items-center gap-2 '>
         <textarea value={input} className='flex-1 resize-none px-3 py-3 border rounded-lg focus:outline-none focus:ring-2' placeholder='decribe your website design'
         onChange={(event)=>setInput(event.target.value)}
         />
-        <Button><ArrowUp/></Button>
+        <Button onClick={handleSend}><ArrowUp/></Button>
       </div>
     </div>
   )
