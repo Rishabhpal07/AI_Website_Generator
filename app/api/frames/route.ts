@@ -1,5 +1,6 @@
 import { db } from "@/config/db";
 import { chatTable, frameTable } from "@/config/schema";
+import { hi } from "date-fns/locale";
 import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -19,7 +20,6 @@ export async function GET(req:NextRequest) {
    console.log(finalResult)
    return NextResponse.json(finalResult)
 } 
-
 export async function PUT(req:NextRequest) {
    const {designCode,frameId,projectId}=await req.json();
    const result=await db.update(frameTable).set({

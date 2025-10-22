@@ -79,9 +79,13 @@ const getFrameDetails = async () => {
       console.log("API Response Data:", result.data); 
       setframeDetail(result.data)
       const designCode=result?.data?.designCode
-      const index=designCode.indexOf("```html")+7
-      const formattedCode=designCode.slice(index)
-      setGeneratedCode(formattedCode)
+      if (designCode && designCode.includes("```html")) {
+        const index = designCode.indexOf("```html") + 7;
+        const formattedCode = designCode.slice(index);
+        setGeneratedCode(formattedCode);
+      } else {
+        setGeneratedCode(designCode || "");
+      }
       if(result.data?.chatMessages?.length==1){
         const userMsg=result.data?.chatMessages[0].content
         SendMessage(userMsg)
@@ -102,10 +106,14 @@ const getFrameDetails = async () => {
 
    const result= await fetch('/api/ai-modal',{
     method:'POST',
+    headers: {
+      'Content-Type': 'application/json' // Add this header
+    },
     body:JSON.stringify({
       messages:[{role:'user',content:Promt?.replace('{userInput}',userInput)}]
     })
    })
+
 
    const reader=result.body?.getReader();
    const decorder=new TextDecoder()

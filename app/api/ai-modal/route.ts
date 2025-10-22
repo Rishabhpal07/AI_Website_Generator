@@ -6,6 +6,8 @@ export async function POST(req:NextRequest) {
     try {
         const { messages } = await req.json();
 
+        console.log("Received Messages Payload:", JSON.stringify(messages, null, 2));
+
         const response = await axios.post(
             "https://openrouter.ai/api/v1/chat/completions",
             {

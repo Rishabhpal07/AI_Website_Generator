@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Code2Icon, Download, Monitor, SquareArrowOutUpLeft, SquareArrowOutUpRight, TabletSmartphone } from 'lucide-react'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import ViewCodeBlock from './ViewCodeBlock'
 
 const HTML_CODE=` <!DOCTYPE html>
       <html lang="en">
@@ -42,20 +43,36 @@ const HTML_CODE=` <!DOCTYPE html>
           <script src="https://unpkg.com/@popperjs/core@2"></script>
           <script src="https://unpkg.com/tippy.js@6"></script>
       </head>
-      <body id="root"></body>
+      <body id="root">
       {code}
+      </body>
       </html>`
 
 function WebPageTools({selectedScreenSize,setSelectedScreenSize,generatedCode}:any) {
+    const[finalCode, setFinalCode]=useState<string>();
+    useEffect(()=>{
+        const cleanCode=(HTML_CODE.replace('{code}',generatedCode)||'').replaceAll("```html",'').replace('```','').replaceAll('html','')
+        setFinalCode(cleanCode)
+    },[generatedCode])
   const ViewInNewTab=()=>{
-  if(!generatedCode) return
+  if(!finalCode) return
 
-  const cleanCode=(HTML_CODE.replace('{code}',generatedCode)||'').replaceAll("```html",'').replace('```','').replace('html','')
-
-  const blob=new Blob( [cleanCode], {type: 'text/html'}) ;
+  const blob=new Blob( [finalCode], {type: 'text/html'}) ;
      const url=URL.createObjectURL(blob);
     window. open(url,"_blank" )
   }
+
+  const downloadCode=()=>{
+  const blob=new Blob( [finalCode??''], {type: 'text/html'}) ;
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a')
+  a.href=url
+  a.download='index.html'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+  } 
 
   return (
     <div className='p-3 shadow rounded-xl w-full flex justify-between'>
@@ -67,8 +84,10 @@ function WebPageTools({selectedScreenSize,setSelectedScreenSize,generatedCode}:a
       </div>
       <div className='flex gap-2'>
         <Button variant={'outline'} onClick={()=>ViewInNewTab()}>View <SquareArrowOutUpRight/></Button>
-        <Button>View <Code2Icon/></Button>
-        <Button>Download code<Download/></Button>
+        <ViewCodeBlock code={finalCode}>
+          <Button>View <Code2Icon/></Button>
+        </ViewCodeBlock>
+        <Button onClick={downloadCode}>Download code<Download/></Button>
       </div>
     </div>
   )
