@@ -25,10 +25,10 @@ type Props = {
 };
 
 const transformOptions = [
-    { label: "Smart Crop", value: "smartcrop", icon: <Crop /> },
-    { label: "Resize", value: "resize", icon: <Expand /> },
-    { label: "Upscale", value: "upscale", icon: <ImageUpscale /> },
-    { label: "BG Remove", value: "bgremove", icon: <ImageMinus /> },
+    { label: "Smart Crop", value: "smartcrop", icon: <Crop />,transformation:'fo-auto' },
+    { label: "Resize", value: "resize", icon: <Expand />,transformation:'e-dropshadow' },
+    { label: "Upscale", value: "upscale", icon: <ImageUpscale /> ,transformation:'e-upscale'},
+    { label: "BG Remove", value: "bgremove", icon: <ImageMinus /> ,transformation:'e-bgremove' },
 ];
 
 var imagekit = new ImageKit({
@@ -82,7 +82,7 @@ function ImageSettingSection({ selectedEl }: Props) {
         isPublished:true
      })
      //@ts-ignore
-     selectedEl.setAttribute('src',imageRef?.url)
+     selectedEl.setAttribute('src',imageRef?.url+"?tr=")
      setloading(false)
     }
 
@@ -92,9 +92,24 @@ function ImageSettingSection({ selectedEl }: Props) {
 
     const GenerateAiImage=()=>{
         setloading(true)
-       const url=`https://ik.imagekit.io/lou4tpwnz/ik-genimg-prompt-${altText}/${Date.now()+'.png'}`
+       const url=`https://ik.imagekit.io/lou4tpwnz/ik-genimg-prompt-${altText}/${Date.now()} .png?tr=`
        setPreview(url)
        selectedEl.setAttribute('src',url)
+    }
+
+    const  ApplyTransformation=(trValue:string)=>{
+     setloading(true);
+
+     if(preview.includes(trValue)){
+        const url=preview+trValue+','
+        setPreview(url);
+        selectedEl.setAttribute('src',url)
+     }
+     else{
+        const url=preview.replaceAll(trValue+",","")
+        setPreview(url);
+        selectedEl.setAttribute('src',url)
+     }
     }
 
     return (
@@ -162,9 +177,9 @@ function ImageSettingSection({ selectedEl }: Props) {
                                     <TooltipTrigger asChild>
                                         <Button
                                             type="button"
-                                            variant={applied ? "default" : "outline"}
+                                            variant={preview.includes(opt.transformation)?'default': "outline"}
                                             className="flex items-center justify-center p-2"
-                                            onClick={() => toggleTransform(opt.value)}
+                                            onClick={() => ApplyTransformation(opt.transformation)}
                                         >
                                             {opt.icon}
                                         </Button>

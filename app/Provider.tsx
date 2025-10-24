@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import axios from "axios"
 import { useUser } from '@clerk/nextjs';
 import { UserDetailContext } from '@/context/userDetailContext';
+import { OnSaveContext } from '@/context/OnSaveContext';
 
 function Provider({
     children,
@@ -11,6 +12,7 @@ function Provider({
 }>){
      const {user}=useUser();
      const [userDetail,setUserDetail]=useState<any>()
+     const [OnSaveData,setOnSaveData]=useState<any>(null)
      useEffect(()=>{
       creatreUser()
      },[user])
@@ -24,7 +26,9 @@ function Provider({
   return (
     <div>
       <UserDetailContext.Provider value={{userDetail,setUserDetail}}>
-      {children}
+        <OnSaveContext.Provider value={{OnSaveData,setOnSaveData}}>
+        {children}
+        </OnSaveContext.Provider>
       </UserDetailContext.Provider>
     </div>
   )

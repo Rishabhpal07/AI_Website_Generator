@@ -1,13 +1,14 @@
 'use client'
 import { Button } from '@/components/ui/button'
-import { SignIn, SignInButton, useUser,  } from '@clerk/nextjs'
+import { UserDetailContext } from '@/context/userDetailContext'
+import { SignIn, SignInButton, useAuth, useUser,  } from '@clerk/nextjs'
 import axios from 'axios'
 import { ArrowUp, HomeIcon, icons, ImagePlus, Key, LayoutDashboard, Loader2Icon, User } from 'lucide-react'
 
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { toast } from 'sonner'
 import { v4 as uuidv4 } from 'uuid';
 
@@ -44,8 +45,18 @@ function Hero() {
     const {user}=useUser();
     const Router=useRouter()
     const [loading,setloading]=useState(false)
+    const {has}=useAuth()
+    const {userDetail,setUserDetail}=useContext(UserDetailContext)
+
+    const hasUnlimitedAcess=has&&has({plan:'unlimited'})
+
 
     const createNewProject=async()=>{
+
+      if(!hasUnlimitedAcess && userDetail?.creadits!<0){
+        toast.error("you have no creadits left, please upgrade to the unlimited plan")
+        return;
+      }
       setloading(true)
       const projectId=uuidv4()
       const frameId=GenerateRandomFrameNumber()
@@ -59,11 +70,16 @@ function Hero() {
         const result=await axios.post('/api/projects',{
            projectId:projectId,
            frameId:frameId,
-           message:message
+           message:message,
+           creadits:userDetail?.creadits
         })
         console.log(result.data)
         toast.success('project created')
         Router.push(`/playground/${projectId}?frameId=${frameId}`)
+        setUserDetail((prev:any) => ({
+          ...prev
+          , creadits: prev?.creadits! - 1
+        }))
         setloading(false)
       } catch (error) {
         toast.error('internal server error')
