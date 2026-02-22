@@ -74,7 +74,7 @@ function Hero() {
            creadits:userDetail?.creadits
         })
         console.log(result.data)
-        toast.success('project created')
+        //toast.success('project created')
         Router.push(`/playground/${projectId}?frameId=${frameId}`)
         setUserDetail((prev:any) => ({
           ...prev

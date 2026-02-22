@@ -7,11 +7,11 @@ export async function POST(req:NextRequest) {
         const { messages } = await req.json();
 
         console.log("Received Messages Payload:", JSON.stringify(messages, null, 2));
-
+        console.log("KEY:", process.env.OPENROUTER_API_KEY);
         const response = await axios.post(
             "https://openrouter.ai/api/v1/chat/completions",
             {
-                model: "google/gemini-2.5-flash-preview-09-2025", // or any OpenRouter-supported model
+                model: "google/gemma-3-4b-it:free",
                 messages,
                 stream: true, // enable streaming
             },
@@ -71,8 +71,5 @@ export async function POST(req:NextRequest) {
                 "Transfer-Encoding": "chunked",
             },
         });
-    } catch (error) {
-        console.error("API error:", error);
-        return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    } catch (error) { console.error("API error:", error); return NextResponse.json({ error: "Something went wrong" }, { status: 500 }); }
     }
-}

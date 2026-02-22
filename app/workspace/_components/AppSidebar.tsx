@@ -41,8 +41,10 @@ import { useContext, useEffect, useState } from "react"
       <Sidebar>
         <SidebarHeader className="p-3">
             <div className="flex items-center gap-3 p-3">
-                <Image src={'/logo.svg'} alt='logo' width={30} height={30} />
-                <h2 className="font-bold text-md">Ai Website Generator</h2>
+            <Link href="/">
+        <Image src={'/logo1.png'} alt='logo' width={30} height={30} />
+        </Link>
+                <h2 className="font-bold text-md">Buildify</h2>
             </div>
             <Link href={'/workspace'} className="mt-2 w-full" >
             <Button className="w-full">

@@ -116,7 +116,9 @@ const getFrameDetails = async () => {
 
 
    const reader=result.body?.getReader();
+   console.log("reader is ",reader)
    const decorder=new TextDecoder()
+   console.log("decoder is ",decorder)
 
    let aiResponse=''
    let isCode=false;
@@ -137,6 +139,7 @@ const getFrameDetails = async () => {
       setGeneratedCode((prev:any)=>prev+chunk)
     }
   }
+
   await SaveGeneratedCode(aiResponse)
     if(!isCode){
       setMessages((prev:any)=>[

@@ -6,6 +6,7 @@ import {
 } from '@clerk/nextjs'
 import Provider from "./Provider";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/ui/themeProvider";
 
 
 const geistSans = Geist({
@@ -34,11 +35,17 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      > <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
         <Provider>
         {children}
         <Toaster/>
         </Provider>
+        </ThemeProvider>
       </body>
     </html>
     </ClerkProvider>

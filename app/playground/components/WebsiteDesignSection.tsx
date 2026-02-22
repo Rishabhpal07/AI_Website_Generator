@@ -193,8 +193,8 @@ useEffect(() => {
         generatedCode={generatedCode}
         />
       </div>
-    
-      {/* <ElementSettingSection selectedEl={selectedElement} clearSelection={()=>setSelectedElement(null)}/> */}
+{/*     
+      <ElementSettingSection selectedEl={selectedElement} clearSelection={()=>setSelectedElement(null)}/> */}
      
       {selectedElement?.tagName=='IMG'?
        //@ts-ignore
