@@ -51,8 +51,14 @@ const HTML_CODE=` <!DOCTYPE html>
 function WebPageTools({selectedScreenSize,setSelectedScreenSize,generatedCode}:any) {
     const[finalCode, setFinalCode]=useState<string>();
     useEffect(()=>{
-        const cleanCode=(HTML_CODE.replace('{code}',generatedCode)||'').replaceAll("```html",'').replace('```','').replaceAll('html','')
-        setFinalCode(cleanCode)
+        const cleanedGenerated = (generatedCode || '').replaceAll("```html", '').replaceAll('```', '').trim()
+
+        // If the generated code already contains a full HTML document, use it directly.
+        const final = /<\/?html/i.test(cleanedGenerated)
+          ? cleanedGenerated
+          : HTML_CODE.replace('{code}', cleanedGenerated)
+
+        setFinalCode(final)
     },[generatedCode])
   const ViewInNewTab=()=>{
   if(!finalCode) return

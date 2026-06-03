@@ -11,7 +11,7 @@ export async function POST(req:NextRequest) {
         const response = await axios.post(
             "https://openrouter.ai/api/v1/chat/completions",
             {
-                model: "google/gemma-4-26b-a4b-it:free",
+                model: "openai/gpt-oss-20b:free",
                 messages,
                 stream: true, // enable streaming
             },
@@ -33,11 +33,27 @@ export async function POST(req:NextRequest) {
 
         const readable = new ReadableStream({
             async start(controller) {
+                let controllerClosed = false;
+
+                const closeController = () => {
+                    if (!controllerClosed) {
+                        controllerClosed = true;
+                        controller.close();
+                    }
+                };
+
+                const errorController = (err:any) => {
+                    if (!controllerClosed) {
+                        controllerClosed = true;
+                        controller.error(err);
+                    }
+                };
+
                 stream.on("data", (chunk:any) => {
                     const payloads = chunk.toString().split("\n\n");
                     for (const payload of payloads) {
                         if (payload.includes("[DONE]")) {
-                            controller.close();
+                            closeController();
                             return;
                         }
                         if (payload.startsWith("data:")) {
@@ -55,12 +71,12 @@ export async function POST(req:NextRequest) {
                 });
 
                 stream.on("end", () => {
-                    controller.close();
+                    closeController();
                 });
 
                 stream.on("error", (err:any) => {
                     console.error("Stream error", err);
-                    controller.error(err);
+                    errorController(err);
                 });
             },
         });

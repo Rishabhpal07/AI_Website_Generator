@@ -22,7 +22,7 @@ function ViewCodeBlock({children,code}:any) {
   return (
     <div>
       <Dialog>
-  <DialogTrigger>{children}</DialogTrigger>
+  <DialogTrigger asChild>{children}</DialogTrigger>
   <DialogContent className="min-w-7xl max-h-[600px] overflow-auto">
     <DialogHeader>
       <DialogTitle><div className='flex gap-2 items-center'>source code<Button onClick={handleCopy} variant={'outline'}><Copy/></Button></div></DialogTitle>

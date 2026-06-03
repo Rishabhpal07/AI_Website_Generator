@@ -68,6 +68,7 @@ function PlayGround() {
     const[loading,setloading]=useState(false)
     const[messages,setMessages]=useState<Messages[]>([])
     const [generatedCode,setGeneratedCode]=useState<any>()
+    const [codeReady,setCodeReady]=useState<boolean>(false)
 
     useEffect(()=>{
        frameId && getFrameDetails()
@@ -104,6 +105,8 @@ const getFrameDetails = async () => {
     {role:'user',content:userInput}
    ])
 
+   setGeneratedCode('')
+
    const result= await fetch('/api/ai-modal',{
     method:'POST',
     headers: {
@@ -116,43 +119,59 @@ const getFrameDetails = async () => {
 
 
    const reader=result.body?.getReader();
-   console.log("reader is ",reader)
-   const decorder=new TextDecoder()
-   console.log("decoder is ",decorder)
+   const decoder=new TextDecoder()
+
+   const looksLikeHtml = (text:string) => /<\/?(html|body|div|section|header|footer|main|article|nav|span|p|img|script|style|button|input|textarea|form|ul|li)[\s>]/i.test(text)
 
    let aiResponse=''
-   let isCode=false;
+   let currentCode=''
+   let isCode=false
+   let codeStarted=false
+
    while(true){
     //@ts-ignore
     const {done,value}=await reader?.read();
     if(done)break;
 
-    const chunk=decorder.decode(value,{stream:true})
+    const chunk=decoder.decode(value,{stream:true})
     aiResponse+=chunk
 
-    if(!isCode && aiResponse.includes('```html')){
-      isCode=true;
-      const index=aiResponse.indexOf("```html")+7
-      const intialCodeChunk=aiResponse.slice(index)
-      setGeneratedCode((prev:any)=>prev+intialCodeChunk)
-    }else if(isCode){
-      setGeneratedCode((prev:any)=>prev+chunk)
+    if(!codeStarted){
+      const fenceIndex=aiResponse.indexOf('```')
+      if(fenceIndex !== -1){
+        codeStarted=true
+        isCode=true
+        const afterFence=aiResponse.slice(fenceIndex + 3).replace(/^html\s*/i, '')
+        currentCode += afterFence
+        setGeneratedCode(currentCode)
+      } else if(looksLikeHtml(aiResponse.trim())){
+        isCode=true
+        currentCode += chunk
+        setGeneratedCode(currentCode)
+      }
+    } else {
+      currentCode += chunk
+      setGeneratedCode(currentCode)
     }
   }
 
-  await SaveGeneratedCode(aiResponse)
-    if(!isCode){
-      setMessages((prev:any)=>[
-        ...prev,
-        {role:'assistant',content:aiResponse}
-      ])
-    }
-    else{
-      setMessages((prev:any)=>[
-        ...prev,
-        {role:'assistant',content:'your code is ready'}
-      ])
-    }
+  const cleanedCode = currentCode
+    .replace(/```(?:html)?/gi, '')
+    .replace(/```$/g, '')
+    .trim()
+
+  if(isCode){
+    await SaveGeneratedCode(cleanedCode || aiResponse)
+    setCodeReady(true)
+    // auto-hide badge after a few seconds
+    setTimeout(()=>setCodeReady(false),4000)
+  } else {
+    await SaveGeneratedCode(aiResponse)
+    setMessages((prev:any)=>[
+      ...prev,
+      {role:'assistant',content:aiResponse}
+    ])
+  }
     setloading(false)
   }
 
@@ -187,7 +206,7 @@ const getFrameDetails = async () => {
       <ChatSection messages={messages??[]}
       onSend={(input: string)=>SendMessage(input)}
       loading={loading}/>
-      <WebsiteDesignSection generatedCode={generatedCode?.replace('```',' ') } />
+      <WebsiteDesignSection generatedCode={generatedCode?.replace('```',' ') } codeReady={codeReady} />
       {/* <ElementSettingSection/> */}
       </div>
     </div>
